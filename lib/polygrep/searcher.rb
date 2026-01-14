@@ -36,6 +36,10 @@ module Polygrep
 
       cmd = build_command(pattern, options)
 
+      if options[:debug]
+        $stderr.puts "\e[33m$ #{cmd.join(' ')}\e[0m"
+      end
+
       # Stream output directly to stdout for real-time results
       system(*cmd)
     end

@@ -39,6 +39,7 @@ module Polygrep
     option :before, aliases: "-B", type: :numeric, desc: "Lines before match"
     option :glob, aliases: "-g", desc: "Glob pattern filter"
     option :skip_noise, aliases: "-N", type: :boolean, desc: "Exclude tests, specs, fixtures, lock files, and long lines (base64)"
+    option :debug, type: :boolean, desc: "Show the rg command being executed"
     def search(pattern)
       config = load_config(options[:config])
       searcher = Searcher.new(config)
@@ -50,7 +51,8 @@ module Polygrep
         after: options[:after],
         before: options[:before],
         glob: options[:glob],
-        skip_noise: options[:skip_noise]
+        skip_noise: options[:skip_noise],
+        debug: options[:debug]
       }.compact
 
       searcher.search(pattern, search_options)
