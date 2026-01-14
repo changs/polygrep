@@ -1,0 +1,6 @@
+# User-specific config
+repos.yml
+
+# Ruby/Bundler
+vendor/
+.bundle/
