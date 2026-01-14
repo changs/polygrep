@@ -1,5 +1,30 @@
 module Polygrep
   class Searcher
+    # Directories commonly containing test files
+    NOISE_DIR_PATTERNS = %w[
+      !**/spec/**
+      !**/specs/**
+      !**/test/**
+      !**/tests/**
+      !**/__tests__/**
+      !**/fixtures/**
+      !**/cassettes/**
+    ].freeze
+
+    # File patterns to exclude
+    NOISE_FILE_PATTERNS = %w[
+      !*.spec.*
+      !*.test.*
+      !*_spec.rb
+      !*_test.rb
+      !*_test.go
+      !*.min.js
+      !*.min.css
+      !package-lock.json
+      !yarn.lock
+      !Gemfile.lock
+    ].freeze
+
     def initialize(config)
       @config = config
     end
@@ -32,6 +57,11 @@ module Polygrep
       cmd += ["-B", options[:before].to_s] if options[:before]
       cmd += ["-g", options[:glob]] if options[:glob]
 
+      # Exclude noise (tests, base64 content, etc.)
+      if options[:skip_noise]
+        add_noise_exclusions(cmd)
+      end
+
       # Line numbers on by default
       cmd << "-n" unless options[:no_line_numbers]
 
@@ -45,6 +75,21 @@ module Polygrep
       cmd << @config.storage_path
 
       cmd
+    end
+
+    def add_noise_exclusions(cmd)
+      # Must include a positive glob first, otherwise exclusions filter everything
+      # Also explicitly exclude hidden files since glob overrides default behavior
+      cmd.push("-g", "*", "--no-hidden")
+
+      # Exclude test directories and files
+      (NOISE_DIR_PATTERNS + NOISE_FILE_PATTERNS).each do |pattern|
+        cmd.push("-g", pattern)
+      end
+
+      # Exclude lines with base64 encoded content (data URIs, long base64 strings)
+      cmd.push("--max-columns", "500")  # Skip very long lines (likely base64/minified)
+      cmd.push("--max-columns-preview")  # Show truncated preview instead of skipping
     end
   end
 
