@@ -1,3 +1,5 @@
+require "open3"
+
 module Polygrep
   class Searcher
     # Directories commonly containing test files
@@ -44,6 +46,22 @@ module Polygrep
       system(*cmd)
     end
 
+    def search_capture(pattern, options = {})
+      unless ripgrep_available?
+        raise SearchError, "ripgrep (rg) is not installed. Install it with: brew install ripgrep"
+      end
+
+      # Don't use color for captured output
+      cmd = build_command(pattern, options.merge(no_color: true))
+
+      if options[:debug]
+        $stderr.puts "\e[33m$ #{cmd.join(' ')}\e[0m"
+      end
+
+      stdout, _stderr, _status = Open3.capture3(*cmd)
+      stdout
+    end
+
     def ripgrep_available?
       system("which rg > /dev/null 2>&1")
     end
@@ -69,8 +87,10 @@ module Polygrep
       # Line numbers on by default
       cmd << "-n" unless options[:no_line_numbers]
 
-      # Color output
-      cmd << "--color=always" if $stdout.tty?
+      # Color output (disable for captured output)
+      unless options[:no_color]
+        cmd << "--color=always" if $stdout.tty?
+      end
 
       # Add pattern
       cmd << pattern

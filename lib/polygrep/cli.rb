@@ -40,6 +40,7 @@ module Polygrep
     option :glob, aliases: "-g", desc: "Glob pattern filter"
     option :skip_noise, aliases: "-N", type: :boolean, desc: "Exclude tests, specs, fixtures, lock files, and long lines (base64)"
     option :debug, type: :boolean, desc: "Show the rg command being executed"
+    option :interactive, aliases: "-I", type: :boolean, desc: "Browse results interactively (j/k to navigate, Enter to open)"
     def search(pattern)
       config = load_config(options[:config])
       searcher = Searcher.new(config)
@@ -55,7 +56,22 @@ module Polygrep
         debug: options[:debug]
       }.compact
 
-      searcher.search(pattern, search_options)
+      if options[:interactive]
+        results = searcher.search_capture(pattern, search_options)
+        if results.empty?
+          say "No results found."
+        else
+          browser = Browser.new(results)
+          Bubbletea.run(browser)
+
+          # Open editor if user selected a result
+          if browser.selected_result
+            open_in_editor(browser.selected_result)
+          end
+        end
+      else
+        searcher.search(pattern, search_options)
+      end
     rescue SearchError => e
       say_error(e.message)
       exit 1
@@ -149,6 +165,15 @@ module Polygrep
 
     def say_error(message)
       $stderr.puts "\e[31m#{message}\e[0m"
+    end
+
+    def open_in_editor(result)
+      editor = ENV["EDITOR"] || "vim"
+      file = result[:file]
+      line = result[:line_num]
+
+      # Use exec to replace this process with the editor
+      exec(editor, "+#{line}", file)
     end
   end
 end

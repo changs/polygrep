@@ -1,6 +1,12 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    bubbletea (0.1.0)
+      lipgloss (~> 0.1)
+    bubbletea (0.1.0-arm64-darwin)
+      lipgloss (~> 0.1)
+    lipgloss (0.2.0)
+    lipgloss (0.2.0-arm64-darwin)
     thor (1.5.0)
 
 PLATFORMS
@@ -8,9 +14,14 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bubbletea
   thor (~> 1.3)
 
 CHECKSUMS
+  bubbletea (0.1.0) sha256=9d2d63a7ab3acddacfae0985bcd629dc9ad902ee32c75420236dae199b2629d6
+  bubbletea (0.1.0-arm64-darwin) sha256=e131a2f336d814781ee93d414bed4edaf4c3cbfa35b4ea83ed37cc8a9f2a86cd
+  lipgloss (0.2.0) sha256=6d99f2118c0f6955ec838ba40992ccf6967653a90986ab22cd2bb6f9d546ced6
+  lipgloss (0.2.0-arm64-darwin) sha256=51744c0c0de85c288ee64ddb6a75db638543e50769a807928ca6e0828945cf22
   thor (1.5.0) sha256=e3a9e55fe857e44859ce104a84675ab6e8cd59c650a49106a05f55f136425e73
 
 BUNDLED WITH
